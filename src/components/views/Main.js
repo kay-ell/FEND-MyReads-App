@@ -8,10 +8,23 @@ class Main extends React.Component {
     books: []
   }
   componentDidMount() {
-    BooksAPI.getAll().then((allBooks) => {
-      this.setState({ allBooks })
+    BooksAPI.getAll().then((books) => {
+      console.log(books)
+      this.setState({ books })
     })
   }
+
+  updateShelf = (book, newShelf) => {
+    BooksAPI.update(book, newShelf)
+    .then(response => {
+      let allBooks = this.state.books
+      book.shelf = newShelf
+      this.setState(state => ({
+        books: allBooks.filter(b => b.id !== book.id).concat([ book ])
+      }))
+    })
+  }
+
   render() {
     return (
       <div className="list-books">
@@ -20,9 +33,9 @@ class Main extends React.Component {
         </div>
         <div className="list-books-content">
           <div>
-            <BookShelf title="Currently Reading" books={this.state.books.filter(book => book.shelf === 'currentlyReading')} />
-            <BookShelf title="Want to Read" books={this.state.books.filter(book => book.shelf === 'wantToRead')} />
-            <BookShelf title="Read" books={this.state.books.filter(book => book.shelf === 'read')} />
+            <BookShelf updateShelf={this.updateShelf} shelfTitle="Currently Reading" booksOnShelf={this.state.books.filter(book => book.shelf === "currentlyReading")} />
+            <BookShelf updateShelf={this.updateShelf} shelfTitle="Want to Read" booksOnShelf={this.state.books.filter(book => book.shelf === "wantToRead")} />
+            <BookShelf updateShelf={this.updateShelf} shelfTitle="Read" booksOnShelf={this.state.books.filter(book => book.shelf === "read")} />
           </div>
         </div>
         <div className="open-search">
