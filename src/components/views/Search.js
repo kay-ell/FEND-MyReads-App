@@ -12,7 +12,6 @@ class Search extends React.Component {
 
   componentDidMount() {
     BooksAPI.getAll().then((books) => {
-      console.log(books)
       this.setState({ Books: books })
     })
   }
@@ -21,27 +20,30 @@ class Search extends React.Component {
     this.setState({ query : query }, this.searchBooks)
   }
 
+ // search the query using BooksAPI's search method
   searchBooks() {
     if(this.state.query && this.state.query.length > 0) {
       BooksAPI.search(this.state.query.trim())
       .then(response => {
-        console.log(response)
-        if(response.error) {
+        if(response.error) { // if there's an error, results will be empty
           return this.setState({ results: [] })
         } else {
-          response.map(res => {
+          response.map(res => { // map the response from the .search method
             let currentShelf = this.state.Books.find(b => b.id === res.id)
+            // find match with books that are on shelf
             if(currentShelf) {
-              res.shelf = currentShelf.shelf
+              res.shelf = currentShelf.shelf // if yes, then the result's shelf is set to the same as the one on current shelf
             } else {
-              res.shelf = "none"
+              res.shelf = "none" // otherwise, shelf is set to "none"
             }
+            return this.setState({ results: response }) // change the state to the response
           })
-          return this.setState({ results: response })
+
         }
       })
     } else if(this.state.query === '' || this.state.query === undefined) {
-        return this.setState({ results: [], Books: [] })
+      // if the query is empty or undefined, reset the state to an empty array for results
+        return this.setState({ results: [] })
     }
   }
 
@@ -64,14 +66,6 @@ class Search extends React.Component {
         <div className="search-books-bar">
           <Link className="close-search" to="/">Close</Link>
           <div className="search-books-input-wrapper">
-            {/*
-              NOTES: The search from BooksAPI is limited to a particular set of search terms.
-              You can find these search terms here:
-              https://github.com/udacity/reactnd-project-myreads-starter/blob/master/SEARCH_TERMS.md
-
-              However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
-              you don't find a specific author or title. Every search is limited by search terms.
-            */}
             <input
               type="text"
               placeholder="Search by title or author"

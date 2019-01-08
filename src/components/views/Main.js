@@ -7,13 +7,15 @@ class Main extends React.Component {
   state = {
     books: []
   }
+
+  // use BooksAPI's getAll() method to get all the books
   componentDidMount() {
     BooksAPI.getAll().then((books) => {
-      console.log(books)
       this.setState({ books })
     })
   }
 
+// update the book's shelf based on selection from the dropdown
   updateShelf = (book, newShelf) => {
     BooksAPI.update(book, newShelf)
     .then(response => {
