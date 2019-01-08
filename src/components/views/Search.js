@@ -10,29 +10,39 @@ class Search extends React.Component {
     Books: []
   }
 
+  componentDidMount() {
+    BooksAPI.getAll().then((books) => {
+      console.log(books)
+      this.setState({ Books: books })
+    })
+  }
+
   updateQuery = (query) => {
     this.setState({ query : query }, this.searchBooks)
   }
 
   searchBooks() {
-    // if query is empty or undefined, clear out the results array
-    if(this.state.query === '' || this.state.query === undefined) {
-      return this.setState({ results: [] })
-    }
-    BooksAPI.search(this.state.query.trim())
-    .then(response => {
-      console.log(response)
-      if(response.error) {
-        return this.setState({ results: [] })
-      } else {
-        response.map(res => {
-          this.state.Books.map(b => {
-            (b.id !== res.id ? res.shelf = "none" : res.shelf = b.shelf)
+    if(this.state.query && this.state.query.length > 0) {
+      BooksAPI.search(this.state.query.trim())
+      .then(response => {
+        console.log(response)
+        if(response.error) {
+          return this.setState({ results: [] })
+        } else {
+          response.map(res => {
+            let currentShelf = this.state.Books.find(b => b.id === res.id)
+            if(currentShelf) {
+              res.shelf = currentShelf.shelf
+            } else {
+              res.shelf = "none"
+            }
           })
-        })
-        return this.setState({ results: response })
-      }
-    })
+          return this.setState({ results: response })
+        }
+      })
+    } else if(this.state.query === '' || this.state.query === undefined) {
+        return this.setState({ results: [], Books: [] })
+    }
   }
 
   updateShelf = (book, newShelf) => {
@@ -77,7 +87,7 @@ class Search extends React.Component {
               this.state.results.map((result, key) => (
                 <Book
                   book={result}
-                  key={key}
+                  key={result.id}
                   updateShelf={this.updateShelf}
                 />
               ))
